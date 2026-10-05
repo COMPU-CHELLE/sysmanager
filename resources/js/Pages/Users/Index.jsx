@@ -2,7 +2,7 @@ import InputError from '@/Components/InputError';
 import InputLabel from '@/Components/InputLabel';
 import TextInput from '@/Components/TextInput';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, useForm } from '@inertiajs/react';
+import { Head, useForm, usePage } from '@inertiajs/react';
 import { KeyRound, Plus, UsersRound } from 'lucide-react';
 
 function toggleSelection(items, itemId) {
@@ -12,6 +12,8 @@ function toggleSelection(items, itemId) {
 }
 
 export default function Index({ users, companies, roles }) {
+    const { auth } = usePage().props;
+    const canCreate = (auth.permissions ?? []).includes('users.create');
     const { data, setData, post, processing, errors, reset } = useForm({
         name: '',
         code: '',
@@ -45,7 +47,7 @@ export default function Index({ users, companies, roles }) {
         >
             <Head title="Usuarios" />
 
-            <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_25rem]">
+            <div className={canCreate ? 'grid gap-8 xl:grid-cols-[minmax(0,1fr)_25rem]' : ''}>
                 <section className="border border-slate-200 bg-white">
                     <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4 sm:px-6">
                         <div>
@@ -106,7 +108,7 @@ export default function Index({ users, companies, roles }) {
                     )}
                 </section>
 
-                <section className="border border-slate-200 bg-white p-5 sm:p-6">
+                {canCreate && <section className="border border-slate-200 bg-white p-5 sm:p-6">
                     <div className="flex items-center gap-2">
                         <Plus aria-hidden="true" className="h-5 w-5 text-teal-700" />
                         <h2 className="text-base font-semibold text-slate-950">Nuevo usuario</h2>
@@ -174,7 +176,7 @@ export default function Index({ users, companies, roles }) {
                             Crear usuario
                         </button>
                     </form>
-                </section>
+                </section>}
             </div>
         </AuthenticatedLayout>
     );

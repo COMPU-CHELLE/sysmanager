@@ -19,9 +19,12 @@ class CompanyManagementTest extends TestCase
         $this->withoutMiddleware(PreventRequestForgery::class);
 
         $user = User::factory()->create();
-        $permission = Permission::factory()->create(['code' => 'companies.manage']);
+        $permissions = Permission::factory()->createMany([
+            ['code' => 'companies.create'],
+            ['code' => 'companies.update'],
+        ]);
         $role = Role::factory()->create();
-        $role->permissions()->attach($permission);
+        $role->permissions()->attach($permissions);
         $user->roles()->attach($role);
 
         $response = $this->actingAs($user)->post('/companies', [

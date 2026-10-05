@@ -23,8 +23,8 @@ class RoleManagementTest extends TestCase
         $permission = Permission::factory()->create();
         $role = Role::factory()->create();
         $role->permissions()->attach(Permission::query()->firstOrCreate(
-            ['code' => 'roles.manage'],
-            ['name' => 'Administrar roles'],
+            ['code' => 'roles.create'],
+            ['name' => 'Crear Roles'],
         ));
         $administrator->roles()->attach($role);
 

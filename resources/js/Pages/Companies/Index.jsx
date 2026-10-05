@@ -2,10 +2,14 @@ import InputError from '@/Components/InputError';
 import InputLabel from '@/Components/InputLabel';
 import TextInput from '@/Components/TextInput';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, router, useForm } from '@inertiajs/react';
+import { Head, router, useForm, usePage } from '@inertiajs/react';
 import { Building2, Plus, Power } from 'lucide-react';
 
 export default function Index({ companies }) {
+    const { auth } = usePage().props;
+    const permissions = auth.permissions ?? [];
+    const canCreate = permissions.includes('companies.create');
+    const canUpdate = permissions.includes('companies.update');
     const { data, setData, post, processing, errors, reset } = useForm({
         name: '',
         code: '',
@@ -42,7 +46,7 @@ export default function Index({ companies }) {
         >
             <Head title="Empresas" />
 
-            <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_22rem]">
+            <div className={canCreate ? 'grid gap-8 lg:grid-cols-[minmax(0,1fr)_22rem]' : ''}>
                 <section className="border border-slate-200 bg-white">
                     <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4 sm:px-6">
                         <div>
@@ -73,7 +77,7 @@ export default function Index({ companies }) {
                                         <th className="px-5 py-3 sm:px-6">Empresa</th>
                                         <th className="px-5 py-3">Codigo</th>
                                         <th className="px-5 py-3">Estado</th>
-                                        <th className="px-5 py-3 text-right sm:px-6">Accion</th>
+                                        {canUpdate && <th className="px-5 py-3 text-right sm:px-6">Accion</th>}
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-100">
@@ -96,17 +100,19 @@ export default function Index({ companies }) {
                                                     {company.isActive ? 'Activa' : 'Inactiva'}
                                                 </span>
                                             </td>
-                                            <td className="px-5 py-4 text-right sm:px-6">
-                                                <button
-                                                    type="button"
-                                                    onClick={() => toggleStatus(company)}
-                                                    className="inline-grid h-9 w-9 place-items-center text-slate-500 hover:bg-slate-100 hover:text-slate-900"
-                                                    aria-label={`${company.isActive ? 'Desactivar' : 'Activar'} ${company.name}`}
-                                                    title={company.isActive ? 'Desactivar' : 'Activar'}
-                                                >
-                                                    <Power aria-hidden="true" className="h-4 w-4" />
-                                                </button>
-                                            </td>
+                                            {canUpdate && (
+                                                <td className="px-5 py-4 text-right sm:px-6">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => toggleStatus(company)}
+                                                        className="inline-grid h-9 w-9 place-items-center text-slate-500 hover:bg-slate-100 hover:text-slate-900"
+                                                        aria-label={`${company.isActive ? 'Desactivar' : 'Activar'} ${company.name}`}
+                                                        title={company.isActive ? 'Desactivar' : 'Activar'}
+                                                    >
+                                                        <Power aria-hidden="true" className="h-4 w-4" />
+                                                    </button>
+                                                </td>
+                                            )}
                                         </tr>
                                     ))}
                                 </tbody>
@@ -115,7 +121,7 @@ export default function Index({ companies }) {
                     )}
                 </section>
 
-                <section className="border border-slate-200 bg-white p-5 sm:p-6">
+                {canCreate && <section className="border border-slate-200 bg-white p-5 sm:p-6">
                     <div className="flex items-center gap-2">
                         <Plus aria-hidden="true" className="h-5 w-5 text-teal-700" />
                         <h2 className="text-base font-semibold text-slate-950">
@@ -159,7 +165,7 @@ export default function Index({ companies }) {
                             Crear empresa
                         </button>
                     </form>
-                </section>
+                </section>}
             </div>
         </AuthenticatedLayout>
     );

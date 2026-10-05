@@ -24,13 +24,17 @@ Route::get('/dashboard', function () {
 Route::middleware('auth')->group(function () {
     Route::resource('companies', CompanyController::class)
         ->only(['index', 'store', 'update'])
-        ->middleware('can:companies.manage');
+        ->middlewareFor('index', 'can:companies.view')
+        ->middlewareFor('store', 'can:companies.create')
+        ->middlewareFor('update', 'can:companies.update');
     Route::resource('roles', RoleController::class)
         ->only(['index', 'store'])
-        ->middleware('can:roles.manage');
+        ->middlewareFor('index', 'can:roles.view')
+        ->middlewareFor('store', 'can:roles.create');
     Route::resource('users', UserController::class)
         ->only(['index', 'store'])
-        ->middleware('can:users.manage');
+        ->middlewareFor('index', 'can:users.view')
+        ->middlewareFor('store', 'can:users.create');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

@@ -24,8 +24,12 @@ class AppServiceProvider extends ServiceProvider
     {
         Vite::prefetch(concurrency: 3);
 
-        Gate::define('companies.manage', fn (User $user): bool => $user->hasPermission('companies.manage'));
-        Gate::define('users.manage', fn (User $user): bool => $user->hasPermission('users.manage'));
-        Gate::define('roles.manage', fn (User $user): bool => $user->hasPermission('roles.manage'));
+        foreach (['companies', 'users', 'roles'] as $module) {
+            foreach (['view', 'create', 'update', 'delete', 'restore', 'force-delete'] as $action) {
+                $permission = "{$module}.{$action}";
+
+                Gate::define($permission, fn (User $user): bool => $user->hasPermission($permission));
+            }
+        }
     }
 }

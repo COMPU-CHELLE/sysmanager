@@ -5,11 +5,14 @@ namespace Tests\Feature;
 use App\Models\Permission;
 use App\Models\Role;
 use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class PermissionAuthorizationTest extends TestCase
 {
-    public function test_users_without_the_required_permission_cannot_manage_roles(): void
+    use RefreshDatabase;
+
+    public function test_users_without_the_view_permission_cannot_see_roles(): void
     {
         $user = User::factory()->create();
 
@@ -18,10 +21,10 @@ class PermissionAuthorizationTest extends TestCase
             ->assertForbidden();
     }
 
-    public function test_users_with_the_required_permission_can_manage_roles(): void
+    public function test_users_with_the_view_permission_can_see_roles(): void
     {
         $user = User::factory()->create();
-        $permission = Permission::factory()->create(['code' => 'roles.manage']);
+        $permission = Permission::factory()->create(['code' => 'roles.view']);
         $role = Role::factory()->create();
         $role->permissions()->attach($permission);
         $user->roles()->attach($role);

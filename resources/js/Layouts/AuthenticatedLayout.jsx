@@ -30,25 +30,33 @@ const navigation = [
         href: 'companies.index',
         active: 'companies.*',
         icon: Building2,
+        permission: 'companies.view',
     },
     {
         label: 'Usuarios',
         href: 'users.index',
         active: 'users.*',
         icon: UsersRound,
+        permission: 'users.view',
     },
     {
         label: 'Roles',
         href: 'roles.index',
         active: 'roles.*',
         icon: ShieldCheck,
+        permission: 'roles.view',
     },
 ];
 
 function Navigation({ onNavigate }) {
+    const { auth } = usePage().props;
+    const permissions = auth.permissions ?? [];
+
     return (
         <nav aria-label="Navegacion principal" className="space-y-1">
-            {navigation.map(({ label, href, active, icon: Icon }) => (
+            {navigation
+                .filter(({ permission }) => !permission || permissions.includes(permission))
+                .map(({ label, href, active, icon: Icon }) => (
                 <Link
                     key={href}
                     href={route(href)}
@@ -62,7 +70,7 @@ function Navigation({ onNavigate }) {
                     <Icon aria-hidden="true" className="h-5 w-5" />
                     {label}
                 </Link>
-            ))}
+                ))}
         </nav>
     );
 }

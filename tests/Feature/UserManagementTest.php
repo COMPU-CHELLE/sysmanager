@@ -21,7 +21,7 @@ class UserManagementTest extends TestCase
         $administrator = User::factory()->create();
         $company = Company::factory()->create();
         $role = Role::factory()->create();
-        $permission = Permission::factory()->create(['code' => 'users.manage']);
+        $permission = Permission::factory()->create(['code' => 'users.create']);
         $role->permissions()->attach($permission);
         $administrator->roles()->attach($role);
 
