@@ -31,6 +31,9 @@ export default function Login({ status, canResetPassword }) {
                 </div>
             )}
 
+            <h1 className="text-2xl font-semibold text-slate-950">Iniciar sesion</h1>
+            <p className="mt-1 mb-6 text-sm text-slate-500">Ingresa con tu correo o codigo de acceso.</p>
+
             <form onSubmit={submit}>
                 <div>
                     <InputLabel htmlFor="login" value="Correo o usuario" />

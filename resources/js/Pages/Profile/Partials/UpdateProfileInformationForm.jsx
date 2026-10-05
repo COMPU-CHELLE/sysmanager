@@ -10,7 +10,7 @@ export default function UpdateProfileInformation({
     status,
     className = '',
 }) {
-    const user = usePage().props.auth.user;
+    const { user, isSupport } = usePage().props.auth;
 
     const { data, setData, patch, errors, processing, recentlySuccessful } =
         useForm({
@@ -28,11 +28,11 @@ export default function UpdateProfileInformation({
         <section className={className}>
             <header>
                 <h2 className="text-lg font-medium text-gray-900">
-                    Profile Information
+                    Informacion del perfil
                 </h2>
 
                 <p className="mt-1 text-sm text-gray-600">
-                    Update your account's profile information and email address.
+                    Solo Soporte puede modificar estos datos.
                 </p>
             </header>
 
@@ -46,7 +46,7 @@ export default function UpdateProfileInformation({
                         value={data.name}
                         onChange={(e) => setData('name', e.target.value)}
                         required
-                        isFocused
+                        disabled={!isSupport}
                         autoComplete="name"
                     />
 
@@ -63,13 +63,16 @@ export default function UpdateProfileInformation({
                         value={data.email}
                         onChange={(e) => setData('email', e.target.value)}
                         required
+                        disabled={!isSupport}
                         autoComplete="username"
                     />
 
                     <InputError className="mt-2" message={errors.email} />
                 </div>
 
-                {mustVerifyEmail && user.email_verified_at === null && (
+                {isSupport &&
+                    mustVerifyEmail &&
+                    user.email_verified_at === null && (
                     <div>
                         <p className="mt-2 text-sm text-gray-800">
                             Your email address is unverified.
@@ -93,7 +96,9 @@ export default function UpdateProfileInformation({
                 )}
 
                 <div className="flex items-center gap-4">
-                    <PrimaryButton disabled={processing}>Save</PrimaryButton>
+                    {isSupport && (
+                        <PrimaryButton disabled={processing}>Guardar</PrimaryButton>
+                    )}
 
                     <Transition
                         show={recentlySuccessful}
@@ -103,7 +108,7 @@ export default function UpdateProfileInformation({
                         leaveTo="opacity-0"
                     >
                         <p className="text-sm text-gray-600">
-                            Saved.
+                            Guardado.
                         </p>
                     </Transition>
                 </div>

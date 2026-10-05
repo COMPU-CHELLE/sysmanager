@@ -2,8 +2,10 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Company;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateCompanyRequest extends FormRequest
 {
@@ -12,7 +14,7 @@ class UpdateCompanyRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true;
+        return $this->user()->accessibleCompanies()->whereKey($this->route('company'))->exists();
     }
 
     /**
@@ -23,7 +25,16 @@ class UpdateCompanyRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'is_active' => ['required', 'boolean'],
+            'name' => ['sometimes', 'required', 'string', 'max:255'],
+            'code' => [
+                'sometimes',
+                'required',
+                'string',
+                'alpha_dash',
+                'max:100',
+                Rule::unique(Company::class)->ignore($this->route('company')),
+            ],
+            'is_active' => ['sometimes', 'required', 'boolean'],
         ];
     }
 }

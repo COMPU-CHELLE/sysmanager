@@ -45,6 +45,8 @@ class ProfileController extends Controller
      */
     public function destroy(Request $request): RedirectResponse
     {
+        abort_unless($request->user()->isSupport(), 403);
+
         $request->validate([
             'password' => ['required', 'current_password'],
         ]);
@@ -53,7 +55,7 @@ class ProfileController extends Controller
 
         Auth::logout();
 
-        $user->delete();
+        $user->forceDelete();
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();

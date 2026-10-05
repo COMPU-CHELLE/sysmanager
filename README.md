@@ -1,58 +1,137 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# SysManager
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+SysManager es una aplicacion multiempresa para administrar operaciones de TI:
+empresas, usuarios, activos, asignaciones, mantenimiento, credenciales,
+facturas, tareas, tickets y auditoria.
 
-## About Laravel
+## Tecnologias
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- PHP 8.3 o superior y Laravel 13.
+- MySQL.
+- Inertia.js 2 y React.
+- Tailwind CSS.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Requisitos
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- PHP y extensiones requeridas por Laravel.
+- Composer.
+- Node.js y npm.
+- Servidor MySQL accesible desde la aplicacion.
 
-## Learning Laravel
+## Instalacion local
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+1. Instalar dependencias:
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+   ```sh
+   composer install
+   npm install
+   ```
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+2. Crear `.env` a partir de `.env.example` si aun no existe y configurar alli
+   la conexion MySQL. No compartir ni subir `.env`.
 
-## Agentic Development
+3. Generar una clave de aplicacion si el entorno aun no tiene una:
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+   ```sh
+   php artisan key:generate
+   ```
 
-```bash
-composer require laravel/boost --dev
+4. Ejecutar migraciones y cargar los datos iniciales:
 
-php artisan boost:install
+   ```sh
+   php artisan migrate --seed
+   ```
+
+5. Compilar los recursos del frontend:
+
+   ```sh
+   npm run build
+   ```
+
+6. Iniciar la aplicacion:
+
+   ```sh
+   php artisan serve --host=127.0.0.1 --port=8000
+   ```
+
+   Durante el desarrollo del frontend, usar `npm run dev` en otra terminal.
+   La raiz `/` redirige al formulario de inicio de sesion `/login`.
+
+> `php artisan migrate:fresh --seed` elimina todas las tablas y datos de la
+> base seleccionada antes de volver a crearlas. Usarlo solo cuando se quiera
+> reiniciar intencionalmente una base local.
+
+## Acceso inicial y roles
+
+`DatabaseSeeder` es el seeder inicial unico. Crea los permisos, los roles
+globales **Soporte**, **Administrador** y **Usuario**, la empresa **DEMO** y el
+usuario global de Soporte. El usuario predeterminado se identifica con el
+codigo `SOPORTE` y el correo `soporte@sysmanager.test`.
+
+Si no se configura una contrasena para Soporte, el seeder genera una aleatoria
+y la muestra en la salida una sola vez al crear la cuenta. Se pueden definir
+`SUPPORT_NAME`, `SUPPORT_CODE`, `SUPPORT_EMAIL` y `SUPPORT_PASSWORD` en el
+entorno local antes de sembrar. No guardar contrasenas en el repositorio.
+
+- **Soporte** tiene alcance global, administra empresas, usuarios, roles y
+  auditoria. Su barra lateral no muestra los modulos operativos.
+- **Administrador** administra la operacion de su empresa y no administra
+  cuentas de Soporte ni de otros administradores.
+- **Usuario** opera los modulos que le permiten sus permisos.
+- Administrador y Usuario solo pueden cambiar su contrasena desde su perfil.
+  Soporte puede actualizar los datos del perfil y eliminar su propia cuenta.
+
+Los permisos se nombran como `<modulo>.<accion>`. Las acciones disponibles son
+`view`, `create`, `update`, `delete`, `restore` y `force-delete`. Los registros
+eliminados logicamente se muestran solo a quienes tienen el permiso `restore`;
+la eliminacion definitiva requiere `force-delete`.
+
+## Modulos y documentacion
+
+La documentacion funcional completa, incluyendo proposito, rutas y permisos
+por modulo, se encuentra en [`doc/modulos.md`](doc/modulos.md). Tambien esta
+disponible desde el boton **Documentacion del sistema** en la barra superior
+despues de iniciar sesion.
+
+| Area | Modulos |
+| --- | --- |
+| Administracion | Empresas, Usuarios, Roles, Planes y Auditoria |
+| Operacion | Sucursales, Empleados, Activos, Asignaciones, Mantenimientos, Credenciales, Facturas, Tareas y Tickets |
+
+La documentacion para desarrolladores y los detalles de las rutas se mantienen
+en [`doc/README.md`](doc/README.md) y [`doc/modulos.md`](doc/modulos.md).
+
+## Pruebas y calidad
+
+El proyecto usa PHPUnit. La configuracion de pruebas fuerza la base MySQL
+`sysmanager_testing`; debe existir y estar disponible antes de ejecutar:
+
+```sh
+php artisan test --compact
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+Las pruebas Feature se retiraron del proyecto; revisar `tests/Unit` para las
+pruebas que permanecen. Para dar formato a los archivos PHP modificados:
 
-## Contributing
+```sh
+vendor/bin/pint --dirty --format agent
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## Estructura principal
 
-## Code of Conduct
+- `app/Http/Controllers`: controladores HTTP, incluidos los CRUD modulares.
+- `app/Models`: modelos Eloquent.
+- `database/migrations`: esquema de base de datos.
+- `database/seeders/DatabaseSeeder.php`: permisos, roles, empresa DEMO y
+  usuario Soporte.
+- `resources/js/Pages`: paginas Inertia/React.
+- `resources/js/Layouts/AuthenticatedLayout.jsx`: layout y navegacion
+  autenticados.
+- `routes/web.php`: rutas web autenticadas y protegidas por permisos.
+- `doc`: documentacion funcional y rutas por modulo.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## Seguridad
 
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+No versionar `.env`, claves, contrasenas ni datos reales. La autorizacion se
+valida en el servidor mediante middleware y alcance por empresa; ocultar una
+opcion en la interfaz no reemplaza esa validacion.

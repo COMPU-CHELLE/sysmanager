@@ -28,9 +28,7 @@ ni sus credenciales.
 	empresa.
 - La administración de Empresas, Usuarios y Roles está protegida por los Gates
 	de acción correspondiente, por ejemplo `companies.view` o `users.create`.
-- El seeder crea tres roles globales: `SuperAdmin` con todos los permisos,
-	`Administrador` con gestión no destructiva de Empresas y Usuarios y lectura de
-	Roles, y `Consulta` con acceso de lectura a los tres módulos.
+- DatabaseSeeder es el unico seeder: crea modulos y permisos (view, create, update, delete, restore, force-delete), los roles globales Soporte y Administrador (todos los permisos) y Usuario (view, create, update en modulos operativos), y la empresa DEMO. Todo lo demas se crea manualmente.
 - Las pantallas Inertia se encuentran en `resources/js/Pages`; la navegación
 	autenticada está en `resources/js/Layouts/AuthenticatedLayout.jsx`.
 
@@ -44,17 +42,17 @@ Por cada migración recibida, integrar en este orden:
 
 1. Revisar claves foráneas, índices, soft deletes y relación con `companies`.
 2. Crear el modelo, factory, request, controlador, rutas y pruebas necesarias.
-3. Añadir el módulo al catálogo de `AccessControlSeeder` para generar permisos
+3. Añadir el módulo al catálogo de `DatabaseSeeder` para generar permisos
 	`view`, `create`, `update`, `delete`, `restore` y `force-delete`.
 4. Proteger cada ruta con el Gate correspondiente y mostrar/ocultar navegación y
 	botones Inertia según el permiso.
 
 ## Acceso administrativo inicial
 
-Primero siembra los permisos y el rol `SuperAdmin`:
+Primero siembra permisos, roles (Soporte, Administrador, Usuario) y la empresa DEMO:
 
 ```sh
-php artisan db:seed --class=AccessControlSeeder --force
+php artisan db:seed --force
 ```
 
 Después crea o actualiza un administrador. El comando solicita la contraseña de

@@ -37,7 +37,7 @@ class CreateInitialAdmin extends Command
             ->first();
 
         if ($superAdmin === null) {
-            $this->components->error('No existe el rol SuperAdmin. Ejecute primero php artisan db:seed.');
+            $this->components->error('No existe el rol Soporte. Ejecute primero php artisan db:seed.');
 
             return self::FAILURE;
         }

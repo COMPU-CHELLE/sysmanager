@@ -29,9 +29,18 @@ class StoreRoleRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:255'],
             'code' => ['required', 'string', 'alpha_dash', 'max:100', Rule::unique(Role::class)],
-            'company_id' => ['nullable', 'integer', Rule::exists(Company::class, 'id')],
+            'company_id' => [
+                $this->user()->isSupport() ? 'nullable' : 'required',
+                'integer',
+                Rule::exists(Company::class, 'id')
+                    ->whereIn('id', $this->user()->accessibleCompanies()->select('companies.id')->pluck('id')),
+            ],
             'permission_ids' => ['nullable', 'array'],
-            'permission_ids.*' => ['integer', Rule::exists(Permission::class, 'id')],
+            'permission_ids.*' => [
+                'integer',
+                Rule::exists(Permission::class, 'id')
+                    ->whereIn('id', $this->user()->grantablePermissions()->select('permissions.id')->pluck('id')),
+            ],
         ];
     }
 }

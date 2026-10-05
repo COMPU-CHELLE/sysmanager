@@ -35,6 +35,7 @@ class HandleInertiaRequests extends Middleware
             ...parent::share($request),
             'auth' => [
                 'user' => $user,
+                'isSupport' => $user?->isSupport() ?? false,
                 'permissions' => $user?->roles()
                     ->with('permissions:id,code')
                     ->get()

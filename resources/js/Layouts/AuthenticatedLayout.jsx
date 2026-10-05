@@ -1,6 +1,19 @@
+import usePermissions from '@/Hooks/usePermissions';
 import { Link, usePage } from '@inertiajs/react';
 import {
     Building2,
+    ArrowLeftRight,
+    ChevronDown,
+    ScrollText,
+    Contact,
+    KeyRound,
+    BookOpen,
+    Laptop,
+    LifeBuoy,
+    ListChecks,
+    Receipt,
+    Store,
+    Wrench,
     LayoutDashboard,
     LogOut,
     Menu,
@@ -20,57 +33,196 @@ const navigation = [
         icon: LayoutDashboard,
     },
     {
-        label: 'Perfil',
-        href: 'profile.edit',
-        active: 'profile.*',
-        icon: UserRound,
+        label: 'Administracion',
+        icon: Settings,
+        children: [
+            {
+                label: 'Empresas',
+                href: 'companies.index',
+                active: 'companies.*',
+                icon: Building2,
+                permission: 'companies.view',
+            },
+            {
+                label: 'Usuarios',
+                href: 'users.index',
+                active: 'users.*',
+                icon: UsersRound,
+                permission: 'users.view',
+            },
+            {
+                label: 'Roles',
+                href: 'roles.index',
+                active: 'roles.*',
+                icon: ShieldCheck,
+                permission: 'roles.view',
+            },
+            {
+                label: 'Auditoria',
+                href: 'audit-logs.index',
+                active: 'audit-logs.*',
+                icon: ScrollText,
+                permission: 'audit-logs.view',
+            },
+        ],
     },
     {
-        label: 'Empresas',
-        href: 'companies.index',
-        active: 'companies.*',
-        icon: Building2,
-        permission: 'companies.view',
-    },
-    {
-        label: 'Usuarios',
-        href: 'users.index',
-        active: 'users.*',
-        icon: UsersRound,
-        permission: 'users.view',
-    },
-    {
-        label: 'Roles',
-        href: 'roles.index',
-        active: 'roles.*',
-        icon: ShieldCheck,
-        permission: 'roles.view',
+        label: 'Operacion',
+        icon: Laptop,
+        children: [
+            {
+                label: 'Sucursales',
+                href: 'branches.index',
+                active: 'branches.*',
+                icon: Store,
+                permission: 'branches.view',
+            },
+            {
+                label: 'Empleados',
+                href: 'employees.index',
+                active: 'employees.*',
+                icon: Contact,
+                permission: 'employees.view',
+            },
+            {
+                label: 'Activos',
+                href: 'assets.index',
+                active: 'assets.*',
+                icon: Laptop,
+                permission: 'assets.view',
+            },
+            {
+                label: 'Asignaciones',
+                href: 'asset-assignments.index',
+                active: 'asset-assignments.*',
+                icon: ArrowLeftRight,
+                permission: 'asset-assignments.view',
+            },
+            {
+                label: 'Mantenimientos',
+                href: 'maintenances.index',
+                active: 'maintenances.*',
+                icon: Wrench,
+                permission: 'maintenances.view',
+            },
+            {
+                label: 'Credenciales',
+                href: 'credentials.index',
+                active: 'credentials.*',
+                icon: KeyRound,
+                permission: 'credentials.view',
+            },
+            {
+                label: 'Facturas',
+                href: 'invoices.index',
+                active: 'invoices.*',
+                icon: Receipt,
+                permission: 'invoices.view',
+            },
+            {
+                label: 'Tareas',
+                href: 'tasks.index',
+                active: 'tasks.*',
+                icon: ListChecks,
+                permission: 'tasks.view',
+            },
+            {
+                label: 'Tickets',
+                href: 'tickets.index',
+                active: 'tickets.*',
+                icon: LifeBuoy,
+                permission: 'tickets.view',
+            },
+        ],
     },
 ];
 
+function isVisible(item, can) {
+    if (item.children) {
+        return item.children.some((child) => isVisible(child, can));
+    }
+
+    return !item.permission || can(item.permission);
+}
+
+function NavItem({ item, can, onNavigate, nested = false }) {
+    const { label, href, active, icon: Icon } = item;
+    const isCurrent = route().current(active);
+
+    return (
+        <Link
+            href={route(href)}
+            onClick={onNavigate}
+            className={`flex items-center gap-3 rounded-md py-2.5 text-sm font-medium transition ${
+                nested ? 'pl-9 pr-3' : 'px-3'
+            } ${
+                isCurrent
+                    ? 'bg-teal-600 text-white shadow-sm'
+                    : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+            }`}
+        >
+            <Icon aria-hidden="true" className="h-5 w-5" />
+            {label}
+        </Link>
+    );
+}
+
+function NavGroup({ item, can, onNavigate }) {
+    const children = item.children.filter((child) => isVisible(child, can));
+    const hasActiveChild = children.some((child) => route().current(child.active));
+    const [open, setOpen] = useState(hasActiveChild);
+    const Icon = item.icon;
+
+    return (
+        <div>
+            <button
+                type="button"
+                onClick={() => setOpen((value) => !value)}
+                aria-expanded={open}
+                className="flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium text-slate-300 transition hover:bg-slate-800 hover:text-white"
+            >
+                <Icon aria-hidden="true" className="h-5 w-5" />
+                <span className="flex-1 text-left">{item.label}</span>
+                <ChevronDown
+                    aria-hidden="true"
+                    className={`h-4 w-4 transition ${open ? 'rotate-180' : ''}`}
+                />
+            </button>
+            {open && (
+                <div className="mt-1 space-y-1">
+                    {children.map((child) => (
+                        <NavItem
+                            key={child.href}
+                            item={child}
+                            can={can}
+                            onNavigate={onNavigate}
+                            nested
+                        />
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+}
+
 function Navigation({ onNavigate }) {
-    const { auth } = usePage().props;
-    const permissions = auth.permissions ?? [];
+    const { can } = usePermissions();
+    const { isSupport } = usePage().props.auth;
+    const items = isSupport
+        ? navigation.filter((item) => item.label !== 'Operacion')
+        : navigation;
 
     return (
         <nav aria-label="Navegacion principal" className="space-y-1">
-            {navigation
-                .filter(({ permission }) => !permission || permissions.includes(permission))
-                .map(({ label, href, active, icon: Icon }) => (
-                <Link
-                    key={href}
-                    href={route(href)}
-                    onClick={onNavigate}
-                    className={`flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition ${
-                        route().current(active)
-                            ? 'bg-teal-600 text-white shadow-sm'
-                            : 'text-slate-300 hover:bg-slate-800 hover:text-white'
-                    }`}
-                >
-                    <Icon aria-hidden="true" className="h-5 w-5" />
-                    {label}
-                </Link>
-                ))}
+            {items
+                .filter((item) => isVisible(item, can))
+                .map((item) =>
+                    item.children ? (
+                        <NavGroup key={item.label} item={item} can={can} onNavigate={onNavigate} />
+                    ) : (
+                        <NavItem key={item.href} item={item} can={can} onNavigate={onNavigate} />
+                    ),
+                )}
         </nav>
     );
 }
@@ -144,6 +296,15 @@ export default function AuthenticatedLayout({ header, children }) {
                     </div>
 
                     <div className="flex items-center gap-1">
+                        <Link
+                            href={route('documentation')}
+                            className="inline-flex h-10 items-center gap-2 rounded-md px-3 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                            aria-label="Documentacion del sistema"
+                            title="Documentacion del sistema"
+                        >
+                            <BookOpen aria-hidden="true" className="h-5 w-5" />
+                            <span className="hidden sm:inline">Documentacion</span>
+                        </Link>
                         <Link
                             href={route('profile.edit')}
                             className="grid h-10 w-10 place-items-center rounded-md text-slate-500 hover:bg-slate-100 hover:text-slate-900"

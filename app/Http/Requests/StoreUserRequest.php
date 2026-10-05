@@ -32,13 +32,20 @@ class StoreUserRequest extends FormRequest
             'code' => ['required', 'string', 'max:255', Rule::unique(User::class)],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', Rule::unique(User::class)],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'branch_id' => ['nullable', 'integer', Rule::exists('branches', 'id')->whereNull('deleted_at')->whereIn('company_id', $this->user()->accessibleCompanies()->pluck('companies.id'))],
             'company_ids' => ['nullable', 'array'],
             'company_ids.*' => [
                 'integer',
-                Rule::exists(Company::class, 'id')->where('is_active', true),
+                Rule::exists(Company::class, 'id')
+                    ->where('is_active', true)
+                    ->whereIn('id', $this->user()->accessibleCompanies()->select('companies.id')->pluck('id')),
             ],
             'role_ids' => ['nullable', 'array'],
-            'role_ids.*' => ['integer', Rule::exists(Role::class, 'id')],
+            'role_ids.*' => [
+                'integer',
+                Rule::exists(Role::class, 'id')
+                    ->whereIn('id', $this->user()->assignableRoles()->select('roles.id')->pluck('id')),
+            ],
         ];
     }
 }

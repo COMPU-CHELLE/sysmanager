@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Models\Permission;
 use App\Models\User;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Vite;
@@ -24,8 +25,8 @@ class AppServiceProvider extends ServiceProvider
     {
         Vite::prefetch(concurrency: 3);
 
-        foreach (['companies', 'users', 'roles'] as $module) {
-            foreach (['view', 'create', 'update', 'delete', 'restore', 'force-delete'] as $action) {
+        foreach (array_keys(Permission::Modules) as $module) {
+            foreach (array_keys(Permission::Actions) as $action) {
                 $permission = "{$module}.{$action}";
 
                 Gate::define($permission, fn (User $user): bool => $user->hasPermission($permission));
